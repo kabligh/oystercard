@@ -4,6 +4,8 @@ class Oystercard
 
   MAX_BALANCE = 90
 
+  MIN_JOURNEY_AMOUNT = 1
+
   def initialize(balance = 0)
     @balance = balance
     @in_journey = false
@@ -23,11 +25,12 @@ class Oystercard
   end
 
   def touch_in
+    raise StandardError.new "You need at least £#{MIN_JOURNEY_AMOUNT} to touch in" if @balance < MIN_JOURNEY_AMOUNT
     @in_journey = true
   end
 
   def touch_out
     @in_journey = false
-  end 
+  end
 
 end
