@@ -3,6 +3,7 @@ require 'oystercard'
 describe Oystercard do
 
   let(:card_with_money) { Oystercard.new(1) }
+  let(:station) { double :station }
 
   it "has a default balance of 0 when set up" do
     expect(subject.balance).to eq 0
@@ -27,22 +28,27 @@ describe Oystercard do
   end
 
   it "is in journey if user touches in" do
-    card_with_money.touch_in
+    card_with_money.touch_in(station)
     expect(card_with_money.in_journey?).to eq true
   end
 
   it "ends journey after touching out" do
-    card_with_money.touch_in
+    card_with_money.touch_in(station)
     card_with_money.touch_out
     expect(subject.in_journey?).to eq false
   end
 
   it "won't let a user touch in if they don't have enough money" do
-    expect { subject.touch_in }.to raise_error(StandardError)
+    expect { subject.touch_in(station) }.to raise_error(StandardError)
   end
 
   it "should deduct £1 after touching out" do
     expect { card_with_money.touch_out }.to change { card_with_money.balance }.by(-1)
+  end
+
+  it "should remember entry station after touching in" do
+    card_with_money.touch_in(station)
+    expect(card_with_money.entry_station).to eq(station)
   end
 
 end
