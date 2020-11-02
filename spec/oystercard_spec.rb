@@ -22,10 +22,6 @@ describe Oystercard do
     expect { subject.top_up 1 }.to raise_error(StandardError)
   end
 
-  it "deducts fares from cards" do
-    expect { subject.deduct(10) }.to change { subject.balance }.by(-10)
-  end
-
   it "is not in a journey by default" do
     expect(subject.in_journey?).to eq false
   end
@@ -43,6 +39,10 @@ describe Oystercard do
 
   it "won't let a user touch in if they don't have enough money" do
     expect { subject.touch_in }.to raise_error(StandardError)
+  end
+
+  it "should deduct £1 after touching out" do
+    expect { card_with_money.touch_out }.to change { card_with_money.balance }.by(-1)
   end
 
 end
