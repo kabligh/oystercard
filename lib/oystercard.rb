@@ -27,7 +27,7 @@ class Oystercard
 
   def touch_out
     deduct(1)
-    @entry_station = false
+    @entry_station = nil
   end
 
   private
