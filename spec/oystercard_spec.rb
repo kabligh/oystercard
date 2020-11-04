@@ -2,8 +2,9 @@ require 'oystercard'
 
 describe Oystercard do
 
-  let(:card_with_money) { Oystercard.new(1) }
-  let(:station) { double :station }
+  let(:card_with_money) { Oystercard.new(Oystercard::MIN_JOURNEY_AMOUNT) }
+  let(:entry_station) { double :station }
+  let(:exit_station) { double :station}
 
   describe "#initialize" do
     it "has a default balance of 0 when set up" do
@@ -12,6 +13,10 @@ describe Oystercard do
 
     it "is not in a journey by default" do
       expect(subject).not_to be_in_journey
+    end
+
+    it "has an empty list of journeys by default" do
+      expect(subject.journeys).to be_empty
     end
   end
 
@@ -31,31 +36,47 @@ describe Oystercard do
     end
   end
 
-  describe "#touch_in" do
+  context "when in journeys" do
+    it "won't let a user touch in if they don't have enough money" do
+      expect { subject.touch_in(entry_station) }.to raise_error(StandardError)
+    end
+
+    before do
+      card_with_money.touch_in(entry_station)
+    end
+
     it "is in journey if user touches in" do
-      card_with_money.touch_in(station)
       expect(card_with_money).to be_in_journey
     end
 
-    it "won't let a user touch in if they don't have enough money" do
-      expect { subject.touch_in(station) }.to raise_error(StandardError)
-    end
-
     it "should remember entry station after touching in" do
-      card_with_money.touch_in(station)
-      expect(card_with_money.entry_station).to eq(station)
+      expect(card_with_money.entry_station).to eq(entry_station)
     end
   end
 
-  describe "#touch_out" do
+  context "when journeys are complete" do
+
+    it "should deduct £1 after touching out" do
+      expect { card_with_money.touch_out(exit_station) }.to change { card_with_money.balance }.by(-Oystercard::MIN_JOURNEY_AMOUNT)
+    end
+
+    before do
+      card_with_money.touch_in(entry_station)
+      card_with_money.touch_out(exit_station)
+    end
+
     it "ends journey after touching out" do
-      card_with_money.touch_in(station)
-      card_with_money.touch_out
       expect(card_with_money).not_to be_in_journey
     end
 
-    it "should deduct £1 after touching out" do
-      expect { card_with_money.touch_out }.to change { card_with_money.balance }.by(-1)
+    it "touches out of a specific station" do
+      expect(card_with_money.exit_station).to eq exit_station
+    end
+
+    let(:journey) { {entry_station: entry_station, exit_station: exit_station} }
+
+    it "stores a journey" do
+      expect(card_with_money.journeys).to include(journey)
     end
   end
 
