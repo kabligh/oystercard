@@ -1,3 +1,5 @@
+require_relative 'journey'
+
 class Oystercard
 
   attr_reader :balance, :entry_station, :exit_station, :journeys
@@ -17,7 +19,7 @@ class Oystercard
   end
 
   def in_journey?
-    @entry_station ? true : false
+    !!@entry_station
   end
 
   def touch_in(entry_station)
