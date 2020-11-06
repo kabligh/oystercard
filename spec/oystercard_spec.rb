@@ -2,9 +2,9 @@ require 'oystercard'
 
 describe Oystercard do
 
-  let(:card_with_money) { Oystercard.new(Oystercard::MIN_JOURNEY_AMOUNT) }
-  let(:entry_station) { double :station }
-  let(:exit_station) { double :station}
+  let(:card_with_money) { Oystercard.new(20) }
+  let(:entry_station) { double :entry_station }
+  let(:exit_station) { double :exit_station}
 
   describe "#initialize" do
     it "has a default balance of 0 when set up" do
@@ -36,27 +36,32 @@ describe Oystercard do
     end
   end
 
-  context "when in journeys" do
+  context "when touching in" do
+
     it "won't let a user touch in if they don't have enough money" do
       expect { subject.touch_in(entry_station) }.to raise_error(StandardError)
     end
 
-    before do
-      card_with_money.touch_in(entry_station)
-    end
-
-    it "is in journey if user touches in" do
-      expect(card_with_money).to be_in_journey
-    end
+    # it "is in journey if user touches in" do
+    #   expect(card_with_money).to be_in_journey
+    # end
 
     it "should remember entry station after touching in" do
-      expect(card_with_money.entry_station).to eq(entry_station)
+      card_with_money.touch_in(entry_station)
+      expect(card_with_money.journey.entry_station).to eq(entry_station)
     end
+
+    it "charges penalty if you touch in without touching out" do
+      card_with_money.touch_in(entry_station)
+      expect{ card_with_money.touch_in(entry_station)}.to change {card_with_money.balance}.by(-6)
+    end
+
   end
 
   context "when journeys are complete" do
 
     it "should deduct £1 after touching out" do
+      card_with_money.touch_in(entry_station)
       expect { card_with_money.touch_out(exit_station) }.to change { card_with_money.balance }.by(-Oystercard::MIN_JOURNEY_AMOUNT)
     end
 
@@ -69,14 +74,8 @@ describe Oystercard do
       expect(card_with_money).not_to be_in_journey
     end
 
-    it "touches out of a specific station" do
-      expect(card_with_money.exit_station).to eq exit_station
-    end
-
-    let(:journey) { {entry_station: entry_station, exit_station: exit_station} }
-
     it "stores a journey" do
-      expect(card_with_money.journeys).to include(journey)
+      expect(card_with_money.journeys[0]).to be_instance_of Journey
     end
   end
 

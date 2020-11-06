@@ -1,4 +1,5 @@
 require 'journey'
+require 'oystercard'
 
 describe Journey do
 
@@ -37,7 +38,8 @@ describe Journey do
       it "calculates a fare" do
         expect(journey.fare).to eq(Journey::MIN_JOURNEY_AMOUNT)
       end
-    end 
+
+    end
 
   end
 
